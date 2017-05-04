@@ -52,8 +52,8 @@ With the above assumptions in mind, I used a slightly modified version of the sl
 3. The *mid-point in x-axis of the window* (instead of the point with the most 1s) is taken to be the location of the lane line within the window. This small tweak from the original method prevented the fitted-curve from having odd curvatures.
 4. Once (x, y) coordinates of detected lane lines are gathered, best fit curves are generated.
 
-The resulting image is shown below:
-![before_warp](./test_video_output/TestOutput.mp4)
+The resulting image is shown below:  
+![sliding_window](./report_images/q4_1.png)
 
 ### 5. Curvature and Center Calculation
 Once the the best fit curves are obtained based on pixel values, we can easily scale them to metric values. I used the values provided by Udacity to do the scaling:   
@@ -65,7 +65,7 @@ Position of vehicle was calculated based on the following assumptions:
     3. How much the mid-point of detected lane lines  deviate from the mid-point of the lane lines from 2 determines the position of the vehicle respect to center.
 
 The resulting image is shown below:
-![before_warp](./report_images/q5_1.png)
+![curvature_center_calculation](./report_images/q5_1.png)
 
 ### 6. Final Result
-![Link to Video](./report_images/q3_1.png)
+[Link to the final Video](./test_video_output/TestOutput.mp4)
