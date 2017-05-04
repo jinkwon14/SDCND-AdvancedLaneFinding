@@ -19,7 +19,7 @@ In the cell below **1.1**, I started by preparing "object points", which are the
 I then used the output `objpoints` and `mgpoints`to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function. I applied this distortion correction to the test image using the `cv2.undistort()` function.
 Below are the results:  
 
-![chessboard_undistort][./report_images/q1_1.png]
+![chessboard_undistort](./report_images/q1_1.png)
 
 ### 2. Color transformation and gradient thresholding.
 We need to further process the undistorted images to clearly distinguish and detect lane lines. Two techniques used are color transformation and gradient thresholding.
@@ -29,7 +29,7 @@ As can be seen in the cell below section **3.5**, a combination of thresholdings
 * Thresholding a S-Channel
 
 The resulting image is shown below:  
-![transformation_binary][./report_images/q2_1.png]
+![transformation_binary](./report_images/q2_1.png)
 
 ### 3. Perspective Transformation.
 Images taken from a front-facing camera on a vehicle have another distortion due to perspective; objects closer to the camera look bigger and that further away smaller. This distortion due to perspective make lane lines seem to converge together, even though they are in fact nearly parallel lines.  
@@ -37,8 +37,8 @@ For this reason, we need to transform the images to be viewed from the "birds-ey
 In the cell below **2.1**, I loaded a clean image to manually select four points that aligns near-perfectly with lane lines. Then, in the cell below  **2.2**, I used the four points to warp the image.
 
 The resulting images are shown below:  
-![before_warp][./report_images/q3_1.png]  
-![after_warp][./report_images/q3_2.png]  
+![before_warp](./report_images/q3_1.png)  
+![after_warp](./report_images/q3_2.png)  
 
 ### 4. Lane Line Detection
 Now that we have images that is warped to "birds-eye views" and pixels of lane lines highlighted with image processing, we can do the actual detection based on a number of assumptions:
@@ -53,7 +53,7 @@ With the above assumptions in mind, I used a slightly modified version of the sl
 4. Once (x, y) coordinates of detected lane lines are gathered, best fit curves are generated.
 
 The resulting image is shown below:
-![before_warp][./test_video_output/TestOutput.mp4]
+![before_warp](./test_video_output/TestOutput.mp4)
 
 ### 5. Curvature and Center Calculation
 Once the the best fit curves are obtained based on pixel values, we can easily scale them to metric values. I used the values provided by Udacity to do the scaling:   
@@ -65,7 +65,7 @@ Position of vehicle was calculated based on the following assumptions:
     3. How much the mid-point of detected lane lines  deviate from the mid-point of the lane lines from 2 determines the position of the vehicle respect to center.
 
 The resulting image is shown below:
-![before_warp][./report_images/q5_1.png]
+![before_warp](./report_images/q5_1.png)
 
 ### 6. Final Result
-![Link to Video][./report_images/q3_1.png]
+![Link to Video](./report_images/q3_1.png)
