@@ -64,8 +64,5 @@ Position of vehicle was calculated based on the following assumptions:
     2. Since 1 is true, each of the two lane lines must be located equidistance away from the left and right edges of an image.
     3. How much the mid-point of detected lane lines  deviate from the mid-point of the lane lines from 2 determines the position of the vehicle respect to center.
 
-The resulting image is shown below:
-![curvature_center_calculation](./report_images/q5_1.png)
-
 ### 6. Final Result
-[Link to the final Video](./test_video_output/TestOutput.mp4)
+[![Output Video](https://youtu.be/sxL7hRSeHs8/0.jpg)](https://youtu.be/sxL7hRSeHs8)
