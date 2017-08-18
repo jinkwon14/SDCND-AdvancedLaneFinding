@@ -65,4 +65,4 @@ Position of vehicle was calculated based on the following assumptions:
     3. How much the mid-point of detected lane lines  deviate from the mid-point of the lane lines from 2 determines the position of the vehicle respect to center.
 
 ### 6. Final Result
-[![Output Video](https://www.youtube.com/watch?v=PqnN5UlK5xs/0.jpg)](https://www.youtube.com/watch?v=PqnN5UlK5xs)
+[![Final Output](./report_images/short_video.gif)](https://www.youtube.com/watch?v=PqnN5UlK5xs)
