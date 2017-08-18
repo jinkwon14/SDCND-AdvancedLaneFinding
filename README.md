@@ -2,34 +2,70 @@
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 
-In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
+**The goals/steps for this project are the following:**
+1. Distortion correction using images of chessboards.
+2. Perspective transformation to view lane lines from straight above.
+3. Processing images to highlight lanelines.
+4. Sliding window search to detect lane lines and their curvatures.
+5. Drawing the detected lane lines on the original images.
 
-Creating a great writeup:
----
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+Complete codes and results for this project can be found in the  [`P3-shorter.ipynb`](https://github.com/kwonjh90/SDCND-AdvancedLaneFinding/blob/master/P3-shorter.ipynb)
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+### 1. Unidstorting an image.
+Images taken with cameras have distortions, which occur while putting 3-D views into a 2-D planes(images). These distortions can be recovered once relevant parameters are determined. Such parameters include a camera matrix and a distortion coefficient.
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+In the cell below **1.1**, I started by preparing "object points", which are the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image. Thus, `objp` is just a replicated array of coordinates, and `objpoints`will be appended with a copy of it every time I successfully detect all chessboard corners in a test image. `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.
 
-The Project
----
+I then used the output `objpoints` and `mgpoints`to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function. I applied this distortion correction to the test image using the `cv2.undistort()` function.
+Below are the results:  
 
-The goals / steps of this project are the following:
+![chessboard_undistort](./report_images/q1_1.png)
 
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+### 2. Color transformation and gradient thresholding.
+We need to further process the undistorted images to clearly distinguish and detect lane lines. Two techniques used are color transformation and gradient thresholding.
 
-The images for camera calibration are stored in the folder called `camera_cal`.  The images in `test_images` are for testing your pipeline on single frames.  If you want to extract more test images from the videos, you can simply use an image writing method like `cv2.imwrite()`, i.e., you can read the video in frame by frame as usual, and for frames you want to save for later you can write to an image file.  
+As can be seen in the cell below section **3.5**, a combination of thresholdings where applied to an image to effectively extract lane lines:  
+* Thresholding a L-Channel -> Sobel X
+* Thresholding a S-Channel
 
-To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `ouput_images`, and include a description in your writeup for the project of what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+The resulting image is shown below:  
+![transformation_binary](./report_images/q2_1.png)
 
-The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
+### 3. Perspective Transformation.
+Images taken from a front-facing camera on a vehicle have another distortion due to perspective; objects closer to the camera look bigger and that further away smaller. This distortion due to perspective make lane lines seem to converge together, even though they are in fact nearly parallel lines.  
+For this reason, we need to transform the images to be viewed from the "birds-eye view". This view will allow the curvatures of lane lines to be displayed and measured accurately. I implemented an OpenCV `cv2.warpPerspective()` method to achieve the perspective transformation.  
+In the cell below **2.1**, I loaded a clean image to manually select four points that aligns near-perfectly with lane lines. Then, in the cell below  **2.2**, I used the four points to warp the image.
 
-If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
+The resulting images are shown below:  
+![before_warp](./report_images/q3_1.png)  
+![after_warp](./report_images/q3_2.png)  
+
+### 4. Lane Line Detection
+Now that we have images that is warped to "birds-eye views" and pixels of lane lines highlighted with image processing, we can do the actual detection based on a number of assumptions:
+* One lane line will likely appear in the left half of the image and the other on the right half.
+* The area the binary image that includes a lane line will likely have clusters of '1's.
+* Lane lines will form straight or near-straight lines with slight curvatures.  
+
+With the above assumptions in mind, I used a slightly modified version of the sliding window method provided as part of the Udacity Self-Driving Car Nanodegree program. Following is the procedure that I followed:
+1. Occurance of 1s of small rectangular subsections(windows) are searched in a binary image.
+2. If a subsection includes an above threshold number of ones, the window is concluded to include a lane line.
+3. The *mid-point in x-axis of the window* (instead of the point with the most 1s) is taken to be the location of the lane line within the window. This small tweak from the original method prevented the fitted-curve from having odd curvatures.
+4. Once (x, y) coordinates of detected lane lines are gathered, best fit curves are generated.
+
+The resulting image is shown below:  
+![sliding_window](./report_images/q4_1.png)
+
+### 5. Curvature and Center Calculation
+Once the the best fit curves are obtained based on pixel values, we can easily scale them to metric values. I used the values provided by Udacity to do the scaling:   
+`ym_per_pix = 30/720 # meters per pixel in y dimension`
+`xm_per_pix = 3.7/700 # meters per pixel in x dimension`
+Position of vehicle was calculated based on the following assumptions:
+    1. The front-facing camera is positioned at the center of the vehicle.
+    2. Since 1 is true, each of the two lane lines must be located equidistance away from the left and right edges of an image.
+    3. How much the mid-point of detected lane lines  deviate from the mid-point of the lane lines from 2 determines the position of the vehicle respect to center.
+
+The resulting image is shown below:
+![curvature_center_calculation](./report_images/q5_1.png)
+
+### 6. Final Result
+[Link to the final Video](./test_video_output/TestOutput.mp4)
